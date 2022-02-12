@@ -1,4 +1,4 @@
-package ee.mn8.castanet
+package org.ergoplatform.castanet
 
 import cats.effect.*
 import cats.effect.std.Dispatcher

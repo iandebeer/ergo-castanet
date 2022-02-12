@@ -77,7 +77,7 @@ lazy val server = project
     name         := "ergo-castanet-server",
     description  := "Protobuf Server",
     // nativeImageVersion := "21.2.0",
-    Compile / mainClass := Some("ee.mn8.castanet.Main"),
+    Compile / mainClass := Some("org.ergoplatform.castanet.Main"),
     libraryDependencies ++= List(
       "ee.mn8"        %% "castanet" % castanetVersion,
       "org.typelevel" %% "cats-core"     % catsVersion,

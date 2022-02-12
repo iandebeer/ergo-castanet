@@ -1,4 +1,4 @@
-package ee.mn8.castanet
+package org.ergoplatform.castanet
 
 import fs2.*
 import cats.effect.*

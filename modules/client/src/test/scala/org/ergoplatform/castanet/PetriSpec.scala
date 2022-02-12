@@ -1,4 +1,4 @@
-package ee.mn8.client
+package org.ergoplatform.client
 import cats.data.State
 import cats.syntax.functor.*
 import io.circe.Decoder
