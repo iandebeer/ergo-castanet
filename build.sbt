@@ -14,12 +14,11 @@ val monocleVersion       = "3.1.0"
 val scodecVersion        = "1.1.30"
 val junitVersion         = "0.11"
 val refinedVersion       = "0.9.27"
-val dhallVersion         = "0.10.0-M2"
 val castanetVersion      = "0.1.4"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 Global / scalaVersion         := Scala3
-Global / organization         := "mn8.ee"
+Global / organization         := "org.ergoplatform"
 Global / version              := "0.1.0"
 
 lazy val root = project
@@ -44,12 +43,7 @@ lazy val client = project
     name        := "ergo-castanet-client",
     description := "Protobuf Client",
     libraryDependencies ++= Seq(
-      // "org.dhallj"          %% "dhall-scala"         % dhallVersion,
       "org.scala-lang" %% "scala3-staging" % Scala3,
-      //"ch.qos.logback" % "logback-classic" % "1.2.6" % Test,
-      "org.dhallj"     % "dhall-imports-mini"  % dhallVersion,
-      "org.dhallj"     % "dhall-yaml"          % dhallVersion,
-      "org.dhallj"    %% "dhall-circe"         % dhallVersion,
       "ee.mn8"        %% "castanet"       % castanetVersion,
       "org.scalameta" %% "munit"               % munitVersion   % Test,
       "org.scalameta" %% "munit-scalacheck"    % munitVersion   % Test,

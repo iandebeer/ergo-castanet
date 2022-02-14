@@ -13,6 +13,14 @@ import _root_.io.grpc.ForwardingServerCall.SimpleForwardingServerCall
 import Constants._
 import org.ergoplatform.flow.spec.flowspec.PetrinetFs2Grpc
 import org.ergoplatform.flow.spec.flowspec.Response
+import ee.mn8.castanet.Place
+import ee.mn8.castanet.Transition
+import ee.mn8.castanet.NodeId
+
+import ee.mn8.castanet.RPC
+
+import ee.mn8.castanet.Service
+
 
 case class AuthInterceptor(msg: String = "hello") extends ServerInterceptor:
   override def interceptCall[Req,Res] (
@@ -24,6 +32,10 @@ case class AuthInterceptor(msg: String = "hello") extends ServerInterceptor:
 
 class FlowSpecImpl extends PetrinetFs2Grpc[IO, Metadata] :
   override def addFlow(request: org.ergoplatform.flow.spec.flowspec.FlowSpec, clientHeaders: Metadata): IO[org.ergoplatform.flow.spec.flowspec.Response] =
+    val p2: Place = Place(2, "left", 3)
+    val s1 = Service()
+    val r1 = RPC("test","test","test")
+    val t1: Transition = Transition(6, "splitter", s1, r1)
     IO(Response(true,"It works: " + request.name))
   
 

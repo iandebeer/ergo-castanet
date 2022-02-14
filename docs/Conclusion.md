@@ -1,61 +1,35 @@
-package org.ergoplatform.castanet
+# ErgoHackIII: Ergo-Castanet - a Colored Petri Net for Smart Contract Orchestration and Testing
 
-import cats.effect.*
-import cats.effect.std.Dispatcher
-import fs2.*
-import _root_.io.grpc.*
-import fs2.grpc.syntax.all.*
-import java.util.concurrent.Executor
-import Constants.*
+## Proposal
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import fs2.grpc.client.ClientOptions
-import _root_.io.grpc.ClientInterceptor
+The core question that I am pursuing is: How do you develop Decentralised Applications? We require a way to compose dApps from smart contracts, much like Functional Programming allows you to compose applications from pure functions.
 
-import cats.effect.IO
-import org.ergoplatform.flow.spec.flowspec.FlowSpec.{Parameter => Param}
+With ErgoHackIII I wanted to test an intuition that the Categorical  (monoidal) aspects of Petri Nets lend itself to composing a dApp from the Boxes (Places) with guarding Contracts and  Transactions (Transitions).   I am basing this intuition on prior work I have in creating Scala 3 implementation of PetriNets (see https://github.com/iandebeer/castanet). It is a generalized implementation in Scala 3, developed with intent  to compose applications from Knative Services under Kubernetes.
 
-/* import org.ergoplatform.flow.spec.flowspec.PetrinetFs2Grpc
-import org.ergoplatform.flow.spec.flowspec.Wallet.Box
-import org.ergoplatform.flow.spec.flowspec.Wallet.Box.ErgCondition
-import org.ergoplatform.flow.spec.flowspec.Transaction */
-import org.ergoplatform.flow.spec.flowspec.Wallet
-import org.ergoplatform.flow.spec.flowspec.Wallet.Box.ErgCondition
-import org.ergoplatform.flow.spec.flowspec.Transaction
-import org.ergoplatform.flow.spec.flowspec.Transaction.InputArrow
-import org.ergoplatform.flow.spec.flowspec.Transaction.SpendingPath
-import org.ergoplatform.flow.spec.flowspec.PetrinetFs2Grpc
-import org.ergoplatform.flow.spec.flowspec.FlowSpec
+As a starting point, I used the "Heads or Tails Game" from the Ergoscript by Example repository to test the concept. I picked this example to render as a Petri Net because it has finite looping (5 plays) and forking and joining concepts. I want build this out so I can visualize this Use Case, and then generalize the concept from there, to a point where one use it for dApp development by visualizing the stages, validating the flow, and running an instance of the dApp in the ErgoPlayground or through Appkit on the Ergo Blockchain.
 
-object Main extends IOApp:
+I want to implement an Ergo-Castanet Client API over GRPC that will support:
 
-  case class JwtCredentials() extends CallCredentials:
-    override def thisUsesUnstableApi(): Unit = {}
-    override def applyRequestMetadata(
-        requestInfo: CallCredentials.RequestInfo,
-        appExecutor: Executor,
-        applier: CallCredentials.MetadataApplier
-    ): Unit =
-      val headers = new Metadata()
-      headers.put[String](AuthorizationMetadataKey, "test")
-      applier.apply(headers)
+```scala
+val dAppID: String                = addDApp(flowSpec: org.ergoplatform.flow.spec.flowspec.FlowSpec)
+val pngURL: URL                   = visualiseDApp(dAppID: String)
+val animated_GIF_URL: URL         = validateDApp(dAppID: String ,markers: Seq(FlowMarkers)
+val markerBitMap: Long            = excuteStepDApp(dAppID : String, markerBitMap: Long, transaction:ErgoTransaction)
+```
 
-  case class KeycloakInterceptor(s: String) extends ClientInterceptor:
-    override def interceptCall[Req, Res](
-        methodDescriptor: MethodDescriptor[Req, Res],
-        callOptions: CallOptions,
-        channel: Channel
-    ) =
-      println("hello from the client")
-      channel.newCall[Req, Res](methodDescriptor, callOptions.withCallCredentials(JwtCredentials()))
+Using the above API with the Head-or-Tails example I expect to visualize the dApp in the following Petri Net:
 
-  val managedChannelStream: Stream[IO, ManagedChannel] =
-    ManagedChannelBuilder
-      .forAddress("127.0.0.1", 9999)
-      .usePlaintext()
-      .intercept(KeycloakInterceptor("hi"))
-      .stream[IO]
+![Petri Net](Heads-Tails-Net.png)
 
+## Conclusion after ErgoHackIII-weekend
+
+ I created a project on GitHub: https://github.com/iandebeer/ergo-castanet.  The project depends on another open source project I published on GitHub https://github.com/iandebeer/castanet 
+ I implemented a GRPC client/server using the Typelevel FS2-GRPC framework. The protobuf I pulled from https://github.com/ergoplatform/ergo-appkit/tree/develop/docs/design-contracts.
+
+
+ This allows me to build a request on the GRPC Client:
+
+ ```scala
   def defineSpec() =
     // The game contract is created by the second player using the funds from the createGameTransaction
     // The output can be spent by the second player after the end of the game, if the first player fails to provide its secret and answer for the withdrawal
@@ -148,21 +122,28 @@ object Main extends IOApp:
 
     FlowSpec(name, parameters, wallets, transaction)
 
-  override def run(args: List[String]): IO[ExitCode] = {
+```
 
-    val flow: FlowSpec = defineSpec()
+The GRPC server will on receipt of the above request, create a Petri Net, as shown above.
 
-    for {
-      dispatcher     <- Stream.resource(Dispatcher[IO])
-      managedChannel <- managedChannelStream
-      flowStub = PetrinetFs2Grpc.stub[IO](dispatcher, managedChannel, ClientOptions.default)
-      _ <- Stream.eval(
-        for {
-          response <- flowStub.addFlow(flow, new Metadata())
-          message  <- IO(response.message)
-          _        <- IO.println(message)
-        } yield ()
-      )
+the code can be tested by running  
+```code
+sbt server/run
+```
 
-    } yield ()
-  }.compile.drain.as(ExitCode.Success)
+and
+
+```code
+sbt client/run
+```
+
+And this is where I ran out of time.
+
+I always realized that this project was not a normal Hackathon project and that the scope goes well beyond what a weekend will allow, but I wanted to:
+
+ 1. Bring this effort to the attention of the Ergo community and hopefully pique their interest; and
+ 2. Validate my intuition on the suitability of Petri Nets as a mechanism to compose dApps from Wallets, boxes and Transactions
+  
+Even though I feel disappointed at not being able to achieve more, I hope trust that I have achieved these goals I set.
+I am eager to continue with this work and hopefully it will, in the near future, find a place in the ErgoPlatform eco-system.
+
