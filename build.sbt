@@ -14,7 +14,7 @@ val monocleVersion       = "3.1.0"
 val scodecVersion        = "1.1.30"
 val junitVersion         = "0.11"
 val refinedVersion       = "0.9.27"
-val castanetVersion      = "0.1.4"
+val castanetVersion      = "0.1.5"
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 Global / scalaVersion         := Scala3
